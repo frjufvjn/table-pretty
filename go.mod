@@ -1,4 +1,4 @@
-module github.com/elwin/table
+module github.com/frjufvjn/table-pretty
 
 go 1.18
 

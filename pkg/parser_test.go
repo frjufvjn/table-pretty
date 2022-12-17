@@ -63,11 +63,11 @@ func Test_parseJSON(t *testing.T) {
 
 func Test_collectHeader(t *testing.T) {
 	tests := []struct {
-		input    []map[string]string
+		input    []map[string]interface{}
 		expected []string
 	}{
 		{
-			input: []map[string]string{
+			input: []map[string]any{
 				{"id": "1", "name": "apple"},
 				{"id": "1", "price": "15"},
 			},

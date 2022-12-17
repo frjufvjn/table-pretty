@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/elwin/table/pkg"
+	"github.com/frjufvjn/table-pretty/pkg"
 	"github.com/pkg/errors"
 	"github.com/spf13/pflag"
 )

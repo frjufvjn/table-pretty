@@ -3,6 +3,7 @@ package pkg
 import (
 	"encoding/csv"
 	"encoding/json"
+	"fmt"
 	"io"
 	"sort"
 
@@ -65,7 +66,7 @@ type JSONParser struct{}
 func (JSONParser) Parse(reader io.Reader) (Content, error) {
 	r := json.NewDecoder(reader)
 
-	var rows []map[string]string
+	var rows []map[string]interface{}
 	if err := r.Decode(&rows); err != nil {
 		return Content{}, err
 	}
@@ -77,7 +78,7 @@ func (JSONParser) Parse(reader io.Reader) (Content, error) {
 	for _, row := range rows {
 		outputRow := make([]string, len(headers))
 		for i, header := range headers {
-			outputRow[i] = row[header]
+			outputRow[i] = fmt.Sprintf("%v", row[header])
 		}
 
 		outputRows = append(outputRows, outputRow)
@@ -96,7 +97,7 @@ func formatTable(c Content, w io.Writer) {
 	table.Render()
 }
 
-func collectHeader(rows []map[string]string) []string {
+func collectHeader(rows []map[string]interface{}) []string {
 	headerMap := map[string]struct{}{}
 	for _, row := range rows {
 		for k := range row {
