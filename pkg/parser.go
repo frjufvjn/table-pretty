@@ -1,12 +1,15 @@
 package pkg
 
 import (
+	"bytes"
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"io"
 	"sort"
+	"strconv"
 
+	"github.com/atotto/clipboard"
 	"github.com/olekukonko/tablewriter"
 )
 
@@ -33,14 +36,37 @@ func Format(p Parser, r io.Reader, w io.Writer) error {
 
 	formatTable(c, w)
 
+	tsvPbcopy(c)
+
 	return nil
+}
+
+// tsv format to clipboard
+func tsvPbcopy(c Content) {
+	fmt.Println("\n📎 TSV RESULT")
+	var tsv bytes.Buffer
+	for _, head := range c.header {
+		tsv.WriteString(head + "\t")
+	}
+	tsv.WriteString("\n")
+	for _, row := range c.rows {
+		for _, value := range row {
+			tsv.WriteString(value + "\t")
+		}
+		tsv.WriteString("\n")
+	}
+	err := clipboard.WriteAll(tsv.String())
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("tsv format is saved into clipboard successfully.\nYou can now paste it into an excel sheet.")
 }
 
 // CSVParser is a parser implementation that parses CSV documents.
 type CSVParser struct{}
 
 // Parse converts the content of a reader to the Content representation.
-func (CSVParser) Parse(reader io.Reader) (Content, error) {
+func (c *CSVParser) Parse(reader io.Reader) (Content, error) {
 	r := csv.NewReader(reader)
 
 	header, err := r.Read()
@@ -63,7 +89,7 @@ func (CSVParser) Parse(reader io.Reader) (Content, error) {
 type JSONParser struct{}
 
 // Parse converts the content of a reader to the Content representation.
-func (JSONParser) Parse(reader io.Reader) (Content, error) {
+func (j *JSONParser) Parse(reader io.Reader) (Content, error) {
 	r := json.NewDecoder(reader)
 
 	var rows []map[string]interface{}
@@ -73,14 +99,17 @@ func (JSONParser) Parse(reader io.Reader) (Content, error) {
 
 	headers := collectHeader(rows)
 	sort.Strings(headers)
+
 	var outputRows [][]string
-
-	for _, row := range rows {
+	for i, row := range rows {
 		outputRow := make([]string, len(headers))
-		for i, header := range headers {
-			outputRow[i] = fmt.Sprintf("%v", row[header])
+		for j, header := range headers {
+			if j == 0 {
+				outputRow[j] = strconv.Itoa(i + 1)
+			} else {
+				outputRow[j] = fmt.Sprintf("%v", row[header])
+			}
 		}
-
 		outputRows = append(outputRows, outputRow)
 	}
 
@@ -91,6 +120,7 @@ func (JSONParser) Parse(reader io.Reader) (Content, error) {
 }
 
 func formatTable(c Content, w io.Writer) {
+	fmt.Printf("\n🕸️  TABLE RESULT (Rows:%d)\n", len(c.rows))
 	table := tablewriter.NewWriter(w)
 	table.SetHeader(c.header)
 	table.AppendBulk(c.rows)
@@ -106,6 +136,7 @@ func collectHeader(rows []map[string]interface{}) []string {
 	}
 
 	var out []string
+	out = append(out, "#")
 	for header := range headerMap {
 		out = append(out, header)
 	}

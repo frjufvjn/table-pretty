@@ -19,14 +19,15 @@ func main() {
 func run() error {
 	format := pflag.StringP("format", "f", "csv", "Format, supported values: csv, json")
 	input := pflag.StringP("input-file", "i", "", "Read input from file")
+
 	pflag.Parse()
 
 	var parser pkg.Parser
 	switch strings.ToLower(*format) {
 	case "csv":
-		parser = pkg.CSVParser{}
+		parser = &pkg.CSVParser{}
 	case "json":
-		parser = pkg.JSONParser{}
+		parser = &pkg.JSONParser{}
 	default:
 		return errors.Errorf(`"%s" is not a supported parser`, *format)
 	}
