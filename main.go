@@ -19,6 +19,7 @@ func main() {
 func run() error {
 	format := pflag.StringP("format", "f", "csv", "Format, supported values: csv, json")
 	input := pflag.StringP("input-file", "i", "", "Read input from file")
+	pbcopy := pflag.BoolP("clipboard", "c", true, "clipboard support")
 
 	pflag.Parse()
 
@@ -42,7 +43,7 @@ func run() error {
 		in = inputFile
 	}
 
-	err := pkg.Format(parser, in, os.Stdout)
+	err := pkg.Format(parser, in, os.Stdout, *pbcopy)
 	if err != nil {
 		return err
 	}

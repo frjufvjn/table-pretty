@@ -28,7 +28,7 @@ type Content struct {
 
 // Format converts the content of the reader to a table format using
 // the supplied parser and writes it to the writer.
-func Format(p Parser, r io.Reader, w io.Writer) error {
+func Format(p Parser, r io.Reader, w io.Writer, enablePbcopy bool) error {
 	c, err := p.Parse(r)
 	if err != nil {
 		return err
@@ -36,7 +36,9 @@ func Format(p Parser, r io.Reader, w io.Writer) error {
 
 	formatTable(c, w)
 
-	tsvPbcopy(c)
+	if enablePbcopy {
+		tsvPbcopy(c)
+	}
 
 	return nil
 }
